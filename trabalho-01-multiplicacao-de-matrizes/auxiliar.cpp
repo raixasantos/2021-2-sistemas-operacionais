@@ -2,53 +2,43 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <random>
+#include <time.h>
 
 using namespace std;
 
-int gerar_matriz(vector<vector<int>> & matriz){
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dist(0,10);
-
-    for(;;){
-        for(;;){
-            int num = dist(gen);
+void gerar_matriz(int mt[], int gatilho, string arquivo){
+    srand(time(NULL));    
+    int linha = mt[0], coluna = mt[1],
+        matrizPrencher[linha][coluna];
+    
+    ofstream out(arquivo);
+    out << linha << " " << coluna << "\n";
+    for(int i = 0; i < linha; i++) {
+        for(int j = 0; j < coluna; j++) {
+            matrizPrencher[i][j] = rand() % 10; //sorteando os números na matriz
+            out << matrizPrencher[i][j] << " "; //escrevendo no aquivo txt designado
         }
+        out << "\n";
     }
-
+    out.close();
 }
 
 int main(int argc, char *argv[]){
     // int dimensoes    array para armazenar as dimensões das matrizes
     int dimensoes[4]; // n1 m1 n2 m2
-
-    // converter e armazenar os argumentos 
+    int mt1[2], mt2[2]; //mt1 = matriz 1 & mt2 = matriz 2
+    // converter e armazenar os argumentos
     for(int j = 0; j < 4; j++){
         stringstream ss(argv[j+1]);
         ss >> dimensoes[j];
-        cout << dimensoes[j] << endl;
     }
-
-    // gerar as matrizes e guardar em arquivos 
-    ofstream arquivo("matriz1.txt");
-    arquivo << "Writing this to a file.\n"; 
-    arquivo.close();
-
-    ofstream arquivo("matriz2.txt");
-    arquivo << "Writing this to a file.\n";
-    arquivo.close();
-
-
-    // verificação
-    string texto;
-    ifstream arquivo_leitura("matriz.txt");
-    while (getline (arquivo_leitura, texto)) {
-        cout << texto << endl;
+    for(int i = 0; i < 2; i++){//preenchendo o vetor com o tamanho da linha e coluna da matriz
+        mt1[i] = dimensoes[i];
+        mt2[i] = dimensoes[i+2];
     }
-    arquivo_leitura.close();
-
-
+    
+    gerar_matriz(mt1, 1, "matriz1.txt"); //1º matriz chamando func
+    gerar_matriz(mt2, 2, "matriz2.txt"); //2º matriz chamando func
 
     return 0;
 }
