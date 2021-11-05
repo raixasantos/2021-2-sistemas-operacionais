@@ -8,18 +8,17 @@ using namespace std;
 
 void gerar_matriz(int mt[], int gatilho, string arquivo){
     srand(time(NULL));    
-    int linha = mt[0], coluna = mt[1],
-        matrizPrencher[linha][coluna];
-    
+    int linha = mt[0], coluna = mt[1];
     ofstream out(arquivo);
+
     out << linha << " " << coluna << "\n";
     for(int i = 0; i < linha; i++) {
         for(int j = 0; j < coluna; j++) {
-            matrizPrencher[i][j] = rand() % 10; //sorteando os números na matriz
-            out << matrizPrencher[i][j] << " "; //escrevendo no aquivo txt designado
+            out << rand() % 10 << " "; // sorteando os números na matriz e escrevendo no aquivo txt designado
         }
         out << "\n";
     }
+    
     out.close();
 }
 

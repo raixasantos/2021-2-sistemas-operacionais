@@ -45,7 +45,7 @@ vector<vector<int>> ler_matriz(char *arquivo){
 }
 
 void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<vector<int>> & matriz2){
-    ofstream out("matriz_sequencial.txt");
+    ofstream out("matriz_processos.txt");
     clock_t fim;
 
     out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
@@ -68,6 +68,7 @@ void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<
 int main(int argc, char *argv[]){
     vector<vector<int>> matriz1 = ler_matriz(argv[1]);
     vector<vector<int>> matriz2 = ler_matriz(argv[2]); 
+
     clock_t inicio;
     inicio = clock();
     multiplicar_matrizes(inicio, matriz1, matriz2);
