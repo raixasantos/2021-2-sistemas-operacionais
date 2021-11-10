@@ -53,9 +53,9 @@ vector<vector<int>> ler_matriz(char *arquivo){
 void* multiplicar_matrizes(vector<vector<int>> & m1, 
                             vector<vector<int>> & m2, clock_t inicio,
                             int indice){
-    string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
+    /*string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
     ofstream out(nome_arquivo);
-    out << m1[0][0] << " " <<  m2[0][1] << endl;    
+    out << m1[0][0] << " " <<  m2[0][1] << endl;   */ 
 
     int somaprod = 0;
     for(int i = 1; i < m1[0][0]+1; i++){
@@ -64,11 +64,19 @@ void* multiplicar_matrizes(vector<vector<int>> & m1,
             for(int a = 1; a < m1[0][1]+1; a++){
                 somaprod += m1[i][a-1] * m2[a][j];
             }
-            clock_t fim;
-            fim = clock();
-            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
+            //clock_t fim;
+            /*fim = clock();
+            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;*/
         }
     }    
+    clock_t fim;
+    fim = clock();
+    string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
+    ofstream out(nome_arquivo);
+    out << m1[0][0] << " " <<  m2[0][1] << endl;   
+            /*clock_t fim;
+            fim = clock();*/
+            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
 
     pthread_exit(NULL);
 }
