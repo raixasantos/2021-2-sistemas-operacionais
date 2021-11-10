@@ -2,11 +2,17 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <string.h>
+#include <string>
 #include <time.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <thread>
 
 using namespace std;
-
 
 vector<vector<int>> ler_matriz(char *arquivo){
     ifstream arquivo_leitura(arquivo);  
@@ -44,34 +50,59 @@ vector<vector<int>> ler_matriz(char *arquivo){
     return matriz;
 }
 
-void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<vector<int>> & matriz2){
-    ofstream out("matriz_processos.txt");
-    clock_t fim;
+void* multiplicar_matrizes(vector<vector<int>> & m1, 
+                            vector<vector<int>> & m2, clock_t inicio,
+                            int indice){
+    string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
+    ofstream out(nome_arquivo);
+    out << m1[0][0] << " " <<  m2[0][1] << endl;    
 
-    out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
-
-    int somaprod;
-    for(int i = 1; i < matriz1[0][0]+1; i++){
-        for(int j = 0; j < matriz2[0][1]; j++){
+    int somaprod = 0;
+    for(int i = 1; i < m1[0][0]+1; i++){
+        for(int j = 0; j < m2[0][1]; j++){
             somaprod = 0;
-            for(int a = 1; a < matriz1[0][1]+1; a++){
-                cout << "matriz1: " << matriz1[i][a] << " * matriz2: " << matriz2[a][j] << endl;
-                somaprod += matriz1[i][a-1] * matriz2[a][j];
+            for(int a = 1; a < m1[0][1]+1; a++){
+                somaprod += m1[i][a-1] * m2[a][j];
             }
+            clock_t fim;
             fim = clock();
             out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
         }
-    }
-    out << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    }    
+
+    pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[]){
-    vector<vector<int>> matriz1 = ler_matriz(argv[1]);
-    vector<vector<int>> matriz2 = ler_matriz(argv[2]); 
+    vector<vector<int>> matriz1, matriz2;
+    matriz1 = ler_matriz(argv[1]);
+    matriz2 = ler_matriz(argv[2]); 
 
+    stringstream ss(argv[3]);
+    int P;
+    ss >> P;
+    int n1 = matriz1[0][0], // linhas
+        m2 = matriz2[0][1]; // colunas
+    int qnt_arquivos = ceil((n1*m2)/P);
+
+    pid_t processos[qnt_arquivos]; // o vetor de threads
+        
     clock_t inicio;
-    inicio = clock();
-    multiplicar_matrizes(inicio, matriz1, matriz2);
+
+    for(int i = 0; i < qnt_arquivos-1; i++){         
+        processos[i] = fork();      
+        if(processos[i] == 0){   
+            inicio = clock();    
+            multiplicar_matrizes(matriz1, matriz2, inicio, i); 
+            //exit(0);
+        }
+    }    
+    
+    inicio = clock();        
+    multiplicar_matrizes(matriz1, matriz2, inicio, qnt_arquivos); 
+    for(int i = 0; i < qnt_arquivos; i++){
+        wait(NULL);
+    }
 
     return 0;
 }
