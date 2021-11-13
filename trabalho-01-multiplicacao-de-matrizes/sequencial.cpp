@@ -59,8 +59,8 @@ void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<
     clock_t fim;
     fim = clock();
 
-
-    ofstream out("matriz_sequencial.txt");
+    
+    ofstream out("../arquivos-sequencial/400x400/10/matriz_sequencial.txt");
     out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
     for(int i = 0; i < resultado.size(); i++)
         out << resultado[i] << endl;
