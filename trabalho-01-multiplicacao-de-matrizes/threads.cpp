@@ -10,14 +10,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <pthread.h>
+#include <thread>
 
 using namespace std;
-
-vector<vector<int>> matriz1, matriz2;
-int linha_atual, coluna_atual, 
-    P, arquivo_atual;
-clock_t inicio, fim;
 
 vector<vector<int>> ler_matriz(char *arquivo){
     ifstream arquivo_leitura(arquivo);  
@@ -55,57 +50,53 @@ vector<vector<int>> ler_matriz(char *arquivo){
     return matriz;
 }
 
-void* multiplicar_matrizes(void *tid){
-    string nome_arquivo = "matriz_threads" + to_string(arquivo_atual) + ".txt";
-    ofstream out(nome_arquivo);
-    out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;    
+void multiplicar_matrizes(vector<vector<int>> & m1, 
+                            vector<vector<int>> & m2, clock_t inicio,
+                            int indice){  
 
     int somaprod = 0;
-    for(int i = linha_atual; i < linha_atual+P; i++){ // corrigir 
-        for(int j = coluna_atual; j < coluna_atual+P; j++){ // corrigir
+    for(int i = 1; i < m1[0][0]+1; i++){
+        for(int j = 0; j < m2[0][1]; j++){
             somaprod = 0;
-            for(int a = 1; a < matriz1[0][1]+1; a++){
-                somaprod += matriz1[i][a-1] * matriz2[a][j];
+            for(int a = 1; a < m1[0][1]+1; a++){
+                somaprod += m1[i][a-1] * m2[a][j];
             }
-            fim = clock();
-            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
         }
     }    
 
-    linha_atual += P;
-    coluna_atual += P;
-    pthread_exit(NULL);
+
+    clock_t fim;
+    fim = clock();
+    string nome_arquivo = "matriz_threads" + to_string(indice) + ".txt";
+    ofstream out(nome_arquivo);
+    out << m1[0][0] << " " <<  m2[0][1] << endl;  
+    // inserir os elementos
+    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
 }
 
 int main(int argc, char *argv[]){
+    vector<vector<int>> matriz1, matriz2;
     matriz1 = ler_matriz(argv[1]);
     matriz2 = ler_matriz(argv[2]); 
-    
-    linha_atual = 1;
-    coluna_atual = 0;
-    arquivo_atual = 1;
 
     stringstream ss(argv[3]);
+    int P;
     ss >> P;
     int n1 = matriz1[0][0], // linhas
         m2 = matriz2[0][1]; // colunas
     int qnt_arquivos = ceil((n1*m2)/P);
 
-    pthread_t thread[qnt_arquivos];
-    int status = 0;
+    vector<thread> threads; // o vetor de threads
 
-    for(int i = 0; i < qnt_arquivos;){
+    for(int i = 0; i < qnt_arquivos;i++){        
+        clock_t inicio;
         inicio = clock();
-        // criar threads 
-        status = pthread_create(&thread[i], NULL, multiplicar_matrizes, (void*)(size_t)i);
+        // criar thread 
+        threads.push_back(thread(multiplicar_matrizes, ref(matriz1), ref(matriz2), inicio, i));
+    }
 
-        if(status != 0){
-            cout << "Erro na criação da thread. Código de erro: %d.\n" << status;
-            return 1;
-        }else{ 
-            i++;
-            arquivo_atual++;
-        }
+    for(auto &thread : threads){ // esperar todas as threads terminarem
+        thread.join();
     }
 
     return 0;
