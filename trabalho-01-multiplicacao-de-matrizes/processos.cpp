@@ -2,15 +2,13 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <string>
+#include <cmath>
 #include <time.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <thread>
 
 using namespace std;
 
@@ -50,35 +48,51 @@ vector<vector<int>> ler_matriz(char *arquivo){
     return matriz;
 }
 
-void* multiplicar_matrizes(vector<vector<int>> & m1, 
+void multiplicar_matrizes(vector<vector<int>> & m1, 
                             vector<vector<int>> & m2, clock_t inicio,
-                            int indice){
-    /*string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
-    ofstream out(nome_arquivo);
-    out << m1[0][0] << " " <<  m2[0][1] << endl;   */ 
+                            int indice, int lc, int cc,
+                            int lf, int cf){      
 
+    int n_1 = m1[0][0], m_2 = m2[0][1];
+    int aux_c = 0, aux_l_t = 0, aux_l = 0, cc_maior = 0;
+    if(lf - lc > 0){ // verificação de linhas para pular
+        cc_maior = 1;
+        aux_c = cf;
+        aux_l_t = lf - lc;
+        cf = m_2;
+    }  
+
+    vector<int> resultado;   
     int somaprod = 0;
-    for(int i = 1; i < m1[0][0]+1; i++){
-        for(int j = 0; j < m2[0][1]; j++){
+    for(int linha = lc; linha <= lf; linha++){
+        for(int coluna = cc; coluna < cf; coluna++){
             somaprod = 0;
-            for(int a = 1; a < m1[0][1]+1; a++){
-                somaprod += m1[i][a-1] * m2[a][j];
+            for(int a = 1; a < n_1+1; a++){
+                somaprod += m1[linha][a-1] * m2[a][coluna];
             }
-            //clock_t fim;
-            /*fim = clock();
-            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;*/
+            resultado.push_back(somaprod);
+        }
+        if(cc_maior){
+            cc = 0;
+            if(aux_l == aux_l_t-1){
+                cf = aux_c;
+            }else{
+                cf = m_2;
+            }
+            aux_l++;
         }
     }    
+
     clock_t fim;
     fim = clock();
+
     string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
     ofstream out(nome_arquivo);
-    out << m1[0][0] << " " <<  m2[0][1] << endl;   
-            /*clock_t fim;
-            fim = clock();*/
-            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
-
-    pthread_exit(NULL);
+    out << n_1 << " " <<  m_2 << endl; 
+    for(int i = 0; i < resultado.size(); i++)
+        out << resultado[i] << endl;
+    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    resultado.clear();
 }
 
 int main(int argc, char *argv[]){
@@ -91,23 +105,39 @@ int main(int argc, char *argv[]){
     ss >> P;
     int n1 = matriz1[0][0], // linhas
         m2 = matriz2[0][1]; // colunas
-    int qnt_arquivos = ceil((n1*m2)/P);
+    int qnt_arquivos = ceil((double) (n1*m2)/P); 
 
-    pid_t processos[qnt_arquivos]; // o vetor de threads
-        
-    clock_t inicio;
+    pid_t processos[qnt_arquivos]; // o vetor de processos
 
-    for(int i = 0; i < qnt_arquivos-1; i++){         
+    int linha_c = 0, coluna_c = 0, linha_f = 0, coluna_f = 0;  
+    for(int i = 0; i < qnt_arquivos; i++){    
+        if(i > 0){
+            linha_c = (P*i)/n1;
+            coluna_c = (P*i)%n1;           
+        }
+        else{
+            linha_c = 0;
+            coluna_c = 0;
+        }
+
+        if(i == qnt_arquivos-1){
+            linha_f = n1-1;
+            coluna_f = m2-1;
+        }
+        else{
+            linha_f = ((P*(i+1))-1)/n1;
+            coluna_f = ((P*(i+1))-1)%n1;
+        }
+
         processos[i] = fork();      
-        if(processos[i] == 0){   
+        if(processos[i] == 0){  
+            clock_t inicio;
             inicio = clock();    
-            multiplicar_matrizes(matriz1, matriz2, inicio, i); 
-            //exit(0);
+            multiplicar_matrizes(matriz1, matriz2, inicio, i, 
+                                linha_c+1, coluna_c, linha_f+1, coluna_f+1); 
         }
     }    
     
-    inicio = clock();        
-    multiplicar_matrizes(matriz1, matriz2, inicio, qnt_arquivos); 
     for(int i = 0; i < qnt_arquivos; i++){
         wait(NULL);
     }
