@@ -45,24 +45,26 @@ vector<vector<int>> ler_matriz(char *arquivo){
 }
 
 void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<vector<int>> & matriz2){
-    ofstream out("matriz_sequencial.txt");
-    clock_t fim;
-
-    out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
-
+    vector<int> resultado;
     int somaprod;
     for(int i = 1; i < matriz1[0][0]+1; i++){
         for(int j = 0; j < matriz2[0][1]; j++){
             somaprod = 0;
             for(int a = 1; a < matriz1[0][1]+1; a++){
-                cout << "matriz1: " << matriz1[i][a] << " * matriz2: " << matriz2[a][j] << endl;
                 somaprod += matriz1[i][a-1] * matriz2[a][j];
             }
-            fim = clock();
-            out << somaprod << ", tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC << endl;
+            resultado.push_back(somaprod);
         }
     }
-    out << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    clock_t fim;
+    fim = clock();
+
+
+    ofstream out("matriz_sequencial.txt");
+    out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
+    for(int i = 0; i < resultado.size(); i++)
+        out << resultado[i] << endl;
+    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC;
 }
 
 int main(int argc, char *argv[]){
