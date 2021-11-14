@@ -1,5 +1,5 @@
 .idea/
 .vscode/
-*.txt
+bin/
 /shelf/
 /workspace.xml
