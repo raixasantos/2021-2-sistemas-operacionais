@@ -4,7 +4,6 @@
 #include <vector>
 #include <string.h>
 #include <time.h>
-
 #include <chrono>
 #include <ctime>    
 
@@ -47,7 +46,7 @@ vector<vector<int>> ler_matriz(char *arquivo){
     return matriz;
 }
 
-void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<vector<int>> & matriz2){
+void multiplicar_matrizes(chrono::steady_clock::time_point inicio, vector<vector<int>> & matriz1, vector<vector<int>> & matriz2){
     vector<int> resultado;
     int somaprod;
     for(int i = 1; i < matriz1[0][0]+1; i++){
@@ -59,26 +58,25 @@ void multiplicar_matrizes(clock_t inicio, vector<vector<int>> & matriz1, vector<
             resultado.push_back(somaprod);
         }
     }
-    clock_t fim;
-    fim = clock();
+    chrono::steady_clock::time_point fim = chrono::steady_clock::now();
 
     
     ofstream out("matriz_sequencial.txt");
     out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
     for(int i = 0; i < resultado.size(); i++)
         out << resultado[i] << endl;
-    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    out << "tempo: "  << chrono::duration_cast<chrono::seconds>(fim - inicio).count();
 }
 
 int main(int argc, char *argv[]){
     vector<vector<int>> matriz1 = ler_matriz(argv[1]);
     vector<vector<int>> matriz2 = ler_matriz(argv[2]); 
+
     auto start = chrono::system_clock::now();
     time_t start_time = chrono::system_clock::to_time_t(start);
     cout << "Iniciando em " << ctime(&start_time)
          << "Calculando..." << endl;
-    clock_t inicio;
-    inicio = clock();
+    chrono::steady_clock::time_point inicio = chrono::steady_clock::now();
     multiplicar_matrizes(inicio, matriz1, matriz2);
     auto end = chrono::system_clock::now();
     time_t end_time = chrono::system_clock::to_time_t(end);
