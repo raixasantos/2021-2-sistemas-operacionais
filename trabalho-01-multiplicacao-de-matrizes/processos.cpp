@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <chrono>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ vector<vector<int>> ler_matriz(char *arquivo){
 }
 
 void multiplicar_matrizes(vector<vector<int>> & m1, 
-                            vector<vector<int>> & m2, clock_t inicio,
+                            vector<vector<int>> & m2, chrono::steady_clock::time_point inicio,
                             int indice, int lc, int cc,
                             int lf, int cf){      
 
@@ -82,16 +83,14 @@ void multiplicar_matrizes(vector<vector<int>> & m1,
             aux_l++;
         }
     }    
+    chrono::steady_clock::time_point fim = chrono::steady_clock::now();
 
-    clock_t fim;
-    fim = clock();
-
-    string nome_arquivo = "matriz_processos" + to_string(indice) + ".txt";
+    string nome_arquivo = "arquivos-sequencial/100x100/1/matriz_processos" + to_string(indice) + ".txt";
     ofstream out(nome_arquivo);
     out << n_1 << " " <<  m_2 << endl; 
     for(int i = 0; i < resultado.size(); i++)
         out << resultado[i] << endl;
-    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    out << "tempo: "  << chrono::duration_cast<chrono::milliseconds>(fim - inicio).count();
     resultado.clear();
 }
 
@@ -109,6 +108,10 @@ int main(int argc, char *argv[]){
 
     pid_t processos[qnt_arquivos]; // o vetor de processos
 
+    auto start = chrono::system_clock::now();
+    time_t start_time = chrono::system_clock::to_time_t(start);
+    cout << "Iniciando em " << ctime(&start_time)
+         << "Calculando..." << endl;
     int linha_c = 0, coluna_c = 0, linha_f = 0, coluna_f = 0;  
     for(int i = 0; i < qnt_arquivos; i++){    
         if(i > 0){
@@ -131,13 +134,14 @@ int main(int argc, char *argv[]){
 
         processos[i] = fork();      
         if(processos[i] == 0){  
-            clock_t inicio;
-            inicio = clock();    
+            chrono::steady_clock::time_point inicio = chrono::steady_clock::now();   
             multiplicar_matrizes(matriz1, matriz2, inicio, i, 
                                 linha_c+1, coluna_c, linha_f+1, coluna_f+1); 
         }
     }    
-    
+    auto end = chrono::system_clock::now();
+    time_t end_time = chrono::system_clock::to_time_t(end);
+    cout << "Finalizado em " << ctime(&end_time) << endl;
     for(int i = 0; i < qnt_arquivos; i++){
         wait(NULL);
     }
