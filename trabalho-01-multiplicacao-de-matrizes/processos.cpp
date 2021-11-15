@@ -85,7 +85,7 @@ void multiplicar_matrizes(vector<vector<int>> & m1,
     }    
     chrono::steady_clock::time_point fim = chrono::steady_clock::now();
 
-    string nome_arquivo = "arquivos-sequencial/100x100/1/matriz_processos" + to_string(indice) + ".txt";
+    string nome_arquivo = "arquivos-processo/3200x3200/10/matriz_processos" + to_string(indice) + ".txt";
     ofstream out(nome_arquivo);
     out << n_1 << " " <<  m_2 << endl; 
     for(int i = 0; i < resultado.size(); i++)
@@ -137,11 +137,14 @@ int main(int argc, char *argv[]){
             chrono::steady_clock::time_point inicio = chrono::steady_clock::now();   
             multiplicar_matrizes(matriz1, matriz2, inicio, i, 
                                 linha_c+1, coluna_c, linha_f+1, coluna_f+1); 
+            if(i == qnt_arquivos-1){
+                auto end = chrono::system_clock::now();
+                time_t end_time = chrono::system_clock::to_time_t(end);
+                cout << "Finalizado em " << ctime(&end_time) << endl;
+            }
+            exit(0);
         }
     }    
-    auto end = chrono::system_clock::now();
-    time_t end_time = chrono::system_clock::to_time_t(end);
-    cout << "Finalizado em " << ctime(&end_time) << endl;
     for(int i = 0; i < qnt_arquivos; i++){
         wait(NULL);
     }
