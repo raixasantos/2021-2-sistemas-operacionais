@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <chrono>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ vector<vector<int>> ler_matriz(char *arquivo){
 }
 
 void multiplicar_matrizes(vector<vector<int>> & m1, 
-                            vector<vector<int>> & m2, clock_t inicio,
+                            vector<vector<int>> & m2, chrono::steady_clock::time_point inicio,
                             int indice, int lc, int cc,
                             int lf, int cf){   
 
@@ -83,15 +84,14 @@ void multiplicar_matrizes(vector<vector<int>> & m1,
         }
     }   
 
-    clock_t fim;
-    fim = clock();
+    chrono::steady_clock::time_point fim = chrono::steady_clock::now();
 
-    string nome_arquivo = "matriz_threads" + to_string(indice) + ".txt";
+    string nome_arquivo = "arquivos-thread/3200x3200/10/matriz_threads" + to_string(indice) + ".txt";
     ofstream out(nome_arquivo);
     out << m1[0][0] << " " <<  m2[0][1] << endl;  
     for(int i = 0; i < resultado.size(); i++)
         out << resultado[i] << endl;
-    out << "tempo: "  << (double)(fim - inicio) / CLOCKS_PER_SEC;
+    out << "tempo: "  << chrono::duration_cast<chrono::milliseconds>(fim - inicio).count();
     resultado.clear();
 }
 
@@ -109,6 +109,10 @@ int main(int argc, char *argv[]){
 
     vector<thread> threads; // o vetor de threads
 
+    auto start = chrono::system_clock::now();
+    time_t start_time = chrono::system_clock::to_time_t(start);
+    cout << "Iniciando em " << ctime(&start_time)
+         << "Calculando..." << endl;
     int linha_c = 0, coluna_c = 0, linha_f = 0, coluna_f = 0;  
     for(int i = 0; i < qnt_arquivos; i++){    
         if(i > 0){
@@ -129,15 +133,17 @@ int main(int argc, char *argv[]){
             coluna_f = ((P*(i+1))-1)%n1;
         }
 
-        clock_t inicio;
-        inicio = clock();
+        chrono::steady_clock::time_point inicio = chrono::steady_clock::now();
         threads.push_back(thread(multiplicar_matrizes, ref(matriz1), ref(matriz2), inicio, i, 
                                 linha_c+1, coluna_c, linha_f+1, coluna_f+1)); 
+
     }
 
     for(auto &thread : threads){ 
         thread.join();
     }
-
+    auto end = chrono::system_clock::now();
+    time_t end_time = chrono::system_clock::to_time_t(end);
+    cout << "Finalizado em " << ctime(&end_time) << endl;
     return 0;
 }
