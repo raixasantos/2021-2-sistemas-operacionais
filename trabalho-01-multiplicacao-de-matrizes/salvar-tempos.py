@@ -1,5 +1,6 @@
 # PRINCIPAL
 pastas = ['processo', 'thread', 'sequencial']
+#pastas = ['processo', 'thread']
 dimensoes = ['100x100', '200x200', '400x400', '800x800', '1600x1600', '3200x3200']
 
 # FUNCAO PARA FORMATAR E ESCREVER OS TEMPOS
@@ -22,8 +23,15 @@ for pasta in pastas:
                 escrever_tempos(arquivo, arq_saida)
             
             else:
+                maior = 0
                 for j in range(0,8):
                     arquivo = caminho + '/' + str(i) + '/matriz_' + pasta + 's' + str(j) + '.txt'
-                    escrever_tempos(arquivo, arq_saida)
+                    arq = open(arquivo)
+                    linhas = arq.readlines()
+                    if(int(linhas[-1][7:]) > int(maior)):
+                        maior = linhas[-1][7:]
+                    if(j == 7):
+                        arq_saida.write(maior + "\n")
+                    
             
             
