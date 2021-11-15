@@ -65,7 +65,7 @@ void multiplicar_matrizes(chrono::steady_clock::time_point inicio, vector<vector
     out << matriz1[0][0] << " " <<  matriz2[0][1] << endl;
     for(int i = 0; i < resultado.size(); i++)
         out << resultado[i] << endl;
-    out << "tempo: "  << chrono::duration_cast<chrono::seconds>(fim - inicio).count();
+    out << "tempo: "  << chrono::duration_cast<chrono::milliseconds>(fim - inicio).count();
 }
 
 int main(int argc, char *argv[]){
