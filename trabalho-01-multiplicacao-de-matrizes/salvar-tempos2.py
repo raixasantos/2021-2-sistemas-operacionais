@@ -1,14 +1,15 @@
 # PRINCIPAL
-pastas = ['processo', 'thread']
+pastas = ['thread']
 #pastas = ['processo', 'thread']
-dimensoes = ['2', '4', '6', '16', '24', '32']
+#dimensoes = ['2', '4', '6', '16', '24', '32']
+dimensoes = ['32']
 
 # FUNCAO PARA FORMATAR E ESCREVER OS TEMPOS
 def escrever_tempos(arquivo, arq_saida):
     arq = open(arquivo)
     linhas = arq.readlines()
     arq_saida.write(linhas[-1][7:] + "\n")
-
+print('vou começar')
 # INICIO DO PROCESSO
 for pasta in pastas:
     for dim in dimensoes:
@@ -25,7 +26,7 @@ for pasta in pastas:
                 linhas = arq.readlines()
                 if(int(linhas[-1][7:]) > int(maior)):
                     maior = linhas[-1][7:]
-                if(j == 7):
+                if(j == int(dim)-1):
                     arq_saida.write(maior + "\n")
             
                     
